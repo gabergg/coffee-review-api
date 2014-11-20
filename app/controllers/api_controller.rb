@@ -19,6 +19,7 @@ class ApiController < ApplicationController
 
   def search_by_term
     @page_count = 1
+    @json_return = {}
 
     @page = Nokogiri::HTML(open(BASE_URL_FIRST + @page_count.to_s + BASE_URL_SECOND + @search_term))
 
@@ -31,11 +32,18 @@ class ApiController < ApplicationController
 
     while true
 
+      @page.css("div.review").each { |review|
+        @bean = {}
+
+        @bean[:rating] = review.css("div.review-rating").text.to_i
+        @bean[:roaster] = review.css("h3").css("a").text
+        
+        @json_return[review.css("h2").css("a").text] = @bean
+      }
+
       begin
         @page_count = @page_count + 1
-        @page = Nokogiri::HTML(open(BASE_URL_FIRST + @page_count.to_s + BASE_URL_SECOND + @search_term)) do
-          # handle doc
-        end
+        @page = Nokogiri::HTML(open(BASE_URL_FIRST + @page_count.to_s + BASE_URL_SECOND + @search_term))
       rescue OpenURI::HTTPError => e
         if e.message == '404 Not Found'
           break
@@ -47,8 +55,8 @@ class ApiController < ApplicationController
     end
 
 
-    return {:page_numbers => @page_count}.to_json
-    
+    return @json_return.to_json
+
   end
 
 end
