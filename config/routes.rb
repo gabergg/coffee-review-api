@@ -2,9 +2,7 @@ CoffeeReviewApi::Application.routes.draw do
 
   scope '/v1' do
     scope '/reviews' do
-      scope '/:term' do
-        get '/' => 'api_handler#'
-      end
+      get '/' => 'api#parse_params'
     end
   end
   # The priority is based upon order of creation: first created -> highest priority.
